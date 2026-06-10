@@ -1,0 +1,206 @@
+<!-- templates/my_orders.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">📦 My Orders & Prescriptions</h2>
+
+{% if orders or prescriptions %}
+<div class="table-responsive">
+<table class="table table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th>Type</th>
+      <th>ID</th>
+      <th>Details</th>
+      <th>Status</th>
+      <th>Tracking</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in all_items %}
+      {% if 'order' in item %}
+        {% set order = item.order %}
+        <tr>
+          <td><span class="badge bg-primary">Medicine Order</span></td>
+          <td>#{{ order.id }}</td>
+          <td>
+            {% for med in item.medicines %}
+              <div class="d-flex align-items-center mb-2">
+                <button class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#viewMedicineModal{{ order.id }}">
+                  <img src="{{ med.image }}" alt="{{ med.name }}" class="img-thumbnail me-2" style="width: 50px; height: 50px;">
+                </button>
+                <div>
+                  <strong>{{ med.name }}</strong><br>
+                  <small>Qty: {{ med.quantity }}</small>
+                </div>
+              </div>
+            {% endfor %}
+          </td>
+          <td>
+            <span class="badge {% if order.status == 'Pending' %}bg-warning{% elif order.status == 'Approved' %}bg-success{% else %}bg-danger{% endif %}">
+              {{ order.status }}
+            </span>
+          </td>
+          <td>
+            {% if order.status == 'Pending' %}
+              <span class="text-muted">Order Placed</span>
+            {% elif order.status == 'Processing' %}
+              <span class="text-info">Being Prepared</span>
+            {% elif order.status == 'Shipped' %}
+              <span class="text-primary">Out for Delivery</span>
+            {% elif order.status == 'Delivered' %}
+              <span class="text-success">Delivered</span>
+            {% else %}
+              <span class="text-danger">{{ order.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if order.prescription %}
+              <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#viewModal{{ order.id }}">View Prescription</button>
+            {% else %}
+              <span class="text-muted">No prescription</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        {% set prescription = item.prescription %}
+        <tr>
+          <td><span class="badge bg-info">Prescription</span></td>
+          <td>#P{{ prescription.id }}</td>
+          <td>
+            <strong>Disease:</strong> {{ prescription.disease }}<br>
+            <strong>Symptoms:</strong> {{ prescription.symptoms[:50] }}{% if prescription.symptoms|length > 50 %}...{% endif %}<br>
+            <strong>Submitted:</strong> {{ prescription.submitted_at.strftime('%b %d, %Y %H:%M') }}
+          </td>
+          <td>
+            <span class="badge {% if prescription.status == 'Pending' %}bg-warning{% elif prescription.status == 'Approved' %}bg-success{% elif prescription.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %}">
+              {{ prescription.status }}
+            </span>
+          </td>
+          <td>
+            {% if prescription.status == 'Pending' %}
+              <span class="text-muted">Under Review</span>
+            {% elif prescription.status == 'Approved' %}
+              <span class="text-success">Ready for Medicine Order</span>
+            {% elif prescription.status == 'Rejected' %}
+              <span class="text-danger">Review Failed</span>
+            {% else %}
+              <span class="text-secondary">{{ prescription.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#viewPrescriptionModal{{ prescription.id }}">View Details</button>
+          </td>
+        </tr>
+      {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<div class="alert alert-info">No orders or prescriptions yet!</div>
+{% endif %}
+
+<!-- Prescription View Modals -->
+{% for order_detail in orders %}
+{% set order = order_detail.order %}
+{% if order.prescription %}
+<div class="modal fade" id="viewModal{{ order.id }}" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel{{ order.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel{{ order.id }}">Prescription Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ url_for('static', filename='uploads/' ~ order.prescription) }}" alt="Prescription" class="img-fluid" style="max-width: 100%; max-height: 70vh;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<!-- Prescription Details Modals -->
+{% for prescription in prescriptions %}
+<div class="modal fade" id="viewPrescriptionModal{{ prescription.id }}" tabindex="-1" role="dialog" aria-labelledby="viewPrescriptionModalLabel{{ prescription.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewPrescriptionModalLabel{{ prescription.id }}">Prescription Details #P{{ prescription.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Patient Information</h6>
+                        <p><strong>Disease:</strong> {{ prescription.disease }}</p>
+                        <p><strong>Symptoms:</strong> {{ prescription.symptoms }}</p>
+                        <p><strong>Prescription Details:</strong> {{ prescription.prescription_details }}</p>
+                        <p><strong>Address:</strong> {{ prescription.address }}</p>
+                        <p><strong>Submitted:</strong> {{ prescription.submitted_at.strftime('%b %d, %Y %H:%M') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Status & Review</h6>
+                        <p><strong>Status:</strong>
+                            <span class="badge {% if prescription.status == 'Pending' %}bg-warning{% elif prescription.status == 'Approved' %}bg-success{% elif prescription.status == 'Rejected' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                {{ prescription.status }}
+                            </span>
+                        </p>
+                        {% if prescription.doctor_notes %}
+                        <p><strong>Doctor Notes:</strong> {{ prescription.doctor_notes }}</p>
+                        {% endif %}
+                        {% if prescription.medicine %}
+                        <p><strong>Recommended Medicine:</strong> {{ prescription.medicine }}</p>
+                        {% endif %}
+                        {% if prescription.dosage %}
+                        <p><strong>Dosage:</strong> {{ prescription.dosage }}</p>
+                        {% endif %}
+                        {% if prescription.rejection_reason %}
+                        <p><strong>Rejection Reason:</strong> {{ prescription.rejection_reason }}</p>
+                        {% endif %}
+                        {% if prescription.reviewed_at %}
+                        <p><strong>Reviewed At:</strong> {{ prescription.reviewed_at.strftime('%b %d, %Y %H:%M') }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <hr>
+                <div class="text-center">
+                    <h6>Prescription Document</h6>
+                    <img src="{{ url_for('static', filename='uploads/' ~ prescription.file_path) }}" alt="Prescription" class="img-fluid" style="max-width: 100%; max-height: 50vh;">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Medicine View Modals -->
+{% for order_detail in orders %}
+{% set order = order_detail.order %}
+{% for med in order_detail.medicines %}
+<div class="modal fade" id="viewMedicineModal{{ order.id }}" tabindex="-1" role="dialog" aria-labelledby="viewMedicineModalLabel{{ order.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewMedicineModalLabel{{ order.id }}">{{ med.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ med.image }}" alt="{{ med.name }}" class="img-fluid" style="max-width: 100%; max-height: 70vh;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endfor %}
+{% endblock %}

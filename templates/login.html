@@ -1,0 +1,25 @@
+<!-- login.html -->
+{% extends "base.html" %}
+<meta name="viewport" content="width=device-width, initial-scale=0.7">
+{% block content %}
+<h2>Login</h2>
+
+<form method="POST">
+  <div class="mb-3">
+    <label>Email</label>
+    <input type="email" name="email" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label>Password</label>
+    <input type="password" name="password" class="form-control" required>
+  </div>
+
+  <!-- 🔗 Forgot Password link -->
+<div class="mb-3 text-end">
+<a href="{{ url_for('auth.forgot_password') }}" style="color: #164d51; text-decoration: none;">Forgot Password?</a>
+</div>
+
+  <button type="submit" class="btn btn-primary">Login</button>
+</form>
+{% endblock %}

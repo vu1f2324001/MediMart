@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Pharma App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS (served locally to avoid CDN blocking) -->
+    <link href="{{ url_for('static', filename='vendor/bootstrap.min.css') }}" rel="stylesheet">
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+      body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        background: linear-gradient(135deg, #f0f9ff, #ffffff);
+        color: #333;
+      }
+
+      .navbar-brand {
+        font-weight: 700;
+        font-size: 1.5rem;
+        color: white !important;
+      }
+
+      .navbar-custom {
+           background-color: #257f8b;
+      }
+
+      .nav-link {
+        color: white !important;
+        font-weight: 500;
+        margin-right: 10px;
+      }
+
+      .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 5px;
+      }
+
+      .alert {
+        font-weight: 500;
+      }
+
+      footer {
+        text-align: center;
+        padding: 25px 10px;
+        background-color: #e0f7fa;
+        font-size: 0.9rem;
+        color: #555;
+        margin-top: 60px;
+        box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.06);
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <!-- 🔷 Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top shadow-sm">
+      <div class="container">    
+<a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('main.home') }}">
+  <i class="fa-solid fa-capsules fa-xl" style="color: #ffffff;"></i>
+  <span><strong>Medi</strong><span style="color:#00e0c2;">Mart</span></span>
+</a>
+        <button class="navbar-toggler" style="color:#00e0c2;" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarMenu">
+          <ul class="navbar-nav ms-auto">
+            {% if current_user.is_authenticated %}
+              {% if current_user.is_admin %}
+                <li class="nav-item">
+<a class="nav-link" href="{{ url_for('admin.admin_dashboard') }}">📊 Admin</a>
+                </li>
+                <li class="nav-item">
+<a class="nav-link" href="{{ url_for('admin.view_orders') }}">📋 Orders</a>
+                </li>
+              {% elif current_user.is_doctor %}
+                <li class="nav-item">
+                  <a class="nav-link" href="{{ url_for('doctor.doctor_dashboard') }}">👨‍⚕️ Doctor</a>
+                </li>
+              {% else %}
+                <li class="nav-item">
+<a class="nav-link" href="{{ url_for('main.upload_prescription') }}">📄 Upload Prescription</a>
+                </li>
+                <li class="nav-item">
+<a class="nav-link" href="{{ url_for('main.cart') }}">🛒 Cart</a>
+                </li>
+                <li class="nav-item">
+<a class="nav-link" href="{{ url_for('main.my_orders') }}">📦 My Orders</a>
+                </li>
+              {% endif %}
+              <li class="nav-item">
+<a class="nav-link" href="{{ url_for('auth.logout') }}">🚪 Logout</a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+<a class="nav-link" href="{{ url_for('auth.login') }}">🔐 Login</a>
+              </li>
+              <li class="nav-item">
+<a class="nav-link" href="{{ url_for('auth.register') }}">📝 Register</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="container mt-3">
+      {% with messages = get_flashed_messages() %}
+        {% if messages %}
+          {% for msg in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              {{ msg }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+      {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      &copy; 2025 PharmaApp. Made with 💙 in India.
+    </footer>
+
+    <!-- Bootstrap JS (served locally to avoid CDN blocking) -->
+    <script src="{{ url_for('static', filename='vendor/bootstrap.bundle.min.js') }}"></script>
+
+    <!-- Auto-hide Flash -->
+    <script>
+      setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(alert => {
+          alert.classList.remove('show');
+          alert.classList.add('fade');
+          setTimeout(() => alert.remove(), 500);
+        });
+      }, 3000);
+    </script>
+  </body>
+</html>

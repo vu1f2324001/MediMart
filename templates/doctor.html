@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Doctor Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Doctor Dashboard</h5>
+                </div>
+                <div class="card-body">
+                    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                        <a class="nav-link active" id="v-pills-pending-tab" data-toggle="pill" href="#v-pills-pending" role="tab" aria-controls="v-pills-pending" aria-selected="true">
+                            <i class="fas fa-clock"></i> Pending Prescriptions
+                            <span class="badge badge-danger float-right">{{ pending_count }}</span>
+                        </a>
+                        <a class="nav-link" id="v-pills-approved-tab" data-toggle="pill" href="#v-pills-approved" role="tab" aria-controls="v-pills-approved" aria-selected="false">
+                            <i class="fas fa-check-circle"></i> Approved Prescriptions
+                            <span class="badge badge-success float-right">{{ approved_count }}</span>
+                        </a>
+                        <a class="nav-link" id="v-pills-rejected-tab" data-toggle="pill" href="#v-pills-rejected" role="tab" aria-controls="v-pills-rejected" aria-selected="false">
+                            <i class="fas fa-times-circle"></i> Rejected Prescriptions
+                            <span class="badge badge-warning float-right">{{ rejected_count }}</span>
+                        </a>
+                        <a class="nav-link" id="v-pills-notifications-tab" data-toggle="pill" href="#v-pills-notifications" role="tab" aria-controls="v-pills-notifications" aria-selected="false">
+                            <i class="fas fa-bell"></i> Notifications
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="tab-content" id="v-pills-tabContent">
+                <!-- Pending Prescriptions Tab -->
+                <div class="tab-pane fade show active" id="v-pills-pending" role="tabpanel" aria-labelledby="v-pills-pending-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Pending Prescriptions</h5>
+                            <!-- Search and Filter -->
+                            <form method="GET" class="form-inline mt-2">
+                                <input type="text" name="search" class="form-control mr-2" placeholder="Search by patient name or email" value="{{ search }}">
+                                <select name="status" class="form-control mr-2">
+                                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Status</option>
+                                    <option value="Pending" {% if status_filter == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="Approved" {% if status_filter == 'Approved' %}selected{% endif %}>Approved</option>
+                                    <option value="Rejected" {% if status_filter == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                </select>
+                                <input type="date" name="date" class="form-control mr-2" value="{{ date_filter }}">
+                                <button type="submit" class="btn btn-primary">Filter</button>
+                            </form>
+                        </div>
+                        <div class="card-body">
+                            {% if prescriptions %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Patient Email</th>
+                                                <th>Submitted Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for prescription in prescriptions %}
+                                                {% if prescription.status == 'Pending' %}
+                                                    <tr>
+                                                        <td>{{ prescription.user.email }}</td>
+                                                        <td>{{ prescription.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                                                        <td>
+                                                            <button class="btn btn-approve btn-sm" data-bs-toggle="modal" data-bs-target="#approveModal{{ prescription.id }}">
+                                                                <i class="fas fa-check"></i> Approve
+                                                            </button>
+                                                            <button class="btn btn-reject btn-sm" data-bs-toggle="modal" data-bs-target="#rejectModal{{ prescription.id }}">
+                                                                <i class="fas fa-times"></i> Reject
+                                                            </button>
+                                                            <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal{{ prescription.id }}">
+                                                                <i class="fas fa-eye"></i> View Document
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Approve Modal -->
+                                                    <div class="modal fade" id="approveModal{{ prescription.id }}" tabindex="-1" role="dialog" aria-labelledby="approveModalLabel{{ prescription.id }}" aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="approveModalLabel{{ prescription.id }}">Approve Prescription</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <form method="POST" action="{{ url_for('doctor.doctor_approve', prescription_id=prescription.id) }}">
+                                                                    <div class="modal-body">
+                                                                        <p>Are you sure you want to approve this prescription for {{ prescription.user.name or prescription.user.email }}?</p>
+                                                                        <div class="form-group">
+                                                                            <label for="notes{{ prescription.id }}">Doctor Notes (Optional):</label>
+                                                                            <textarea class="form-control" id="notes{{ prescription.id }}" name="notes" rows="3"></textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                                        <button type="submit" class="btn btn-success">Approve</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Reject Modal -->
+                                                    <div class="modal fade" id="rejectModal{{ prescription.id }}" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel{{ prescription.id }}" aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="rejectModalLabel{{ prescription.id }}">Reject Prescription</h5>
+                                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+                                                                <form method="POST" action="{{ url_for('doctor.doctor_reject', prescription_id=prescription.id) }}">
+                                                                    <div class="modal-body">
+                                                                        <p>Are you sure you want to reject this prescription for {{ prescription.user.name or prescription.user.email }}?</p>
+                                                                        <div class="form-group">
+                                                                            <label for="notes{{ prescription.id }}">Reason for Rejection:</label>
+                                                                            <textarea class="form-control" id="notes{{ prescription.id }}" name="notes" rows="3" required></textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                                        <button type="submit" class="btn btn-danger">Reject</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- View Document Modal -->
+                                                    <div class="modal fade" id="viewModal{{ prescription.id }}" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel{{ prescription.id }}" aria-hidden="true">
+                                                        <div class="modal-dialog modal-lg" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title" id="viewModalLabel{{ prescription.id }}">Prescription Document</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    <div class="row">
+                                                                        <div class="col-md-6">
+                                                                            <h6>Patient Details:</h6>
+                                                                            <p><strong>Email:</strong> {{ prescription.user.email }}</p>
+                                                                            <p><strong>Phone:</strong> {{ prescription.user.phone }}</p>
+                                                                            <p><strong>Address:</strong> {{ prescription.address or 'N/A' }}</p>
+                                                                        </div>
+                                                                        <div class="col-md-6">
+                                                                            <h6>Medical Details:</h6>
+                                                                            <p><strong>Disease:</strong> {{ prescription.disease or 'N/A' }}</p>
+                                                                            <p><strong>Symptoms:</strong> {{ prescription.symptoms or 'N/A' }}</p>
+                                                                            <p><strong>Prescription Details:</strong> {{ prescription.prescription_details or 'N/A' }}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <hr>
+                                                                    <div class="text-center">
+                                                                        <h6>Prescription Document:</h6>
+                                                                        <img src="{{ url_for('static', filename='uploads/' + prescription.file_path) }}" alt="Prescription" class="img-fluid" style="max-width: 100%; max-height: 70vh;">
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> No pending prescriptions found.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Approved Prescriptions Tab -->
+                <div class="tab-pane fade" id="v-pills-approved" role="tabpanel" aria-labelledby="v-pills-approved-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Approved Prescriptions</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if prescriptions %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Patient Email</th>
+                                                <th>Approved Date</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for prescription in prescriptions %}
+                                                {% if prescription.status == 'Approved' %}
+                                                    <tr>
+                                                        <td>{{ prescription.user.email }}</td>
+                                                        <td>{{ prescription.reviewed_at.strftime('%Y-%m-%d %H:%M') if prescription.reviewed_at else 'N/A' }}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> No approved prescriptions found.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rejected Prescriptions Tab -->
+                <div class="tab-pane fade" id="v-pills-rejected" role="tabpanel" aria-labelledby="v-pills-rejected-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Rejected Prescriptions</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if prescriptions %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Patient Email</th>
+                                                <th>Rejected Date</th>
+                                                <th>Reason</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for prescription in prescriptions %}
+                                                {% if prescription.status == 'Rejected' %}
+                                                    <tr>
+                                                        <td>{{ prescription.user.email }}</td>
+                                                        <td>{{ prescription.reviewed_at.strftime('%Y-%m-%d %H:%M') if prescription.reviewed_at else 'N/A' }}</td>
+                                                        <td>{{ prescription.rejection_reason or 'N/A' }}</td>
+                                                    </tr>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> No rejected prescriptions found.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Tab -->
+                <div class="tab-pane fade" id="v-pills-notifications" role="tabpanel" aria-labelledby="v-pills-notifications-tab">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Notifications</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-success">
+                                <i class="fas fa-bell"></i> <strong>New Prescription Alert!</strong> You have {{ pending_count }} pending prescriptions to review.
+                            </div>
+                            {% if pending_count > 0 %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> Please review the pending prescriptions in the "Pending Prescriptions" tab.
+                                </div>
+                            {% endif %}
+                            <div class="alert alert-secondary">
+                                <i class="fas fa-check-circle"></i> You have approved {{ approved_count }} prescriptions this month.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

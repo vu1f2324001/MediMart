@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="mb-4">📋 Doctor Approved Prescriptions for Admin Approval</h2>
+
+<div class="table-responsive">
+<table class="table table-bordered table-hover">
+  <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Patient</th>
+      <th>Address</th>
+      <th>Doctor</th>
+      <th>Prescription Photo</th>
+      <th>Status</th>
+      <th>Date</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for prescription in prescriptions %}
+    <tr>
+      <td>{{ prescription.id }}</td>
+      <td>{{ prescription.user.email }}</td>
+      <td>{{ prescription.address or 'N/A' }}</td>
+      <td>{{ prescription.doctor.email if prescription.doctor else 'None' }}</td>
+      <td>Prescription</td>
+      <td>
+        <span class="badge bg-info">Doctor Approved</span>
+      </td>
+      <td>{{ prescription.submitted_at.strftime('%Y-%m-%d') }}</td>
+      <td>
+        <button class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewModal{{ prescription.id }}">View</button>
+        <form method="POST" action="{{ url_for('admin.admin_verify', prescription_id=prescription.id) }}" class="d-inline">
+          <input type="hidden" name="action" value="approve">
+          <button class="btn btn-success btn-sm">Approve</button>
+        </form>
+        <form method="POST" action="{{ url_for('admin.admin_verify', prescription_id=prescription.id) }}" class="d-inline">
+          <input type="hidden" name="action" value="reject">
+          <button class="btn btn-danger btn-sm">Reject</button>
+        </form>
+      </td>
+    </tr>
+
+    <!-- View Document Modal -->
+    <div class="modal fade" id="viewModal{{ prescription.id }}" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel{{ prescription.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewModalLabel{{ prescription.id }}">Prescription Document</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img src="{{ url_for('static', filename='uploads/' ~ prescription.file_path) }}" alt="Prescription" class="img-fluid" style="max-width: 100%; max-height: 70vh;">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+{% if prescriptions|length == 0 %}
+<div class="alert alert-info">
+  <i class="fas fa-info-circle"></i> No pending prescriptions found.
+</div>
+{% endif %}
+
+<a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary mt-3">⬅ Back to Dashboard</a>
+{% endblock %}

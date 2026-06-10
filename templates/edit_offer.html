@@ -1,0 +1,27 @@
+{% extends "admin_dashboard.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Edit Offer</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ offer.title }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea class="form-control" id="description" name="description" rows="3" required>{{ offer.description }}</textarea>
+        </div>
+        <div class="mb-3">
+            <label for="discount" class="form-label">Discount (%)</label>
+            <input type="number" class="form-control" id="discount" name="discount" value="{{ offer.discount }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="valid_until" class="form-label">Valid Until</label>
+            <input type="date" class="form-control" id="valid_until" name="valid_until" value="{{ offer.valid_until.strftime('%Y-%m-%d') }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Update Offer</button>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+<!-- templates/orders.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h2>📦 All Orders</h2>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Order ID</th>
+      <th>User Email</th>
+      <th>Medicines</th>
+      <th>Status</th>
+      <th>Prescription</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td>{{ order.id }}</td>
+      <td>{{ order.user.email }}</td>
+      <td>{{ order.medicine.name }}</td>
+      <td>{{ order.status }}</td>
+      <td>
+        {% if order.prescription %}
+        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#viewModal{{ order.id }}">View</button>
+        {% else %}N/A{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Prescription View Modals -->
+{% for order in orders %}
+{% if order.prescription %}
+<div class="modal fade" id="viewModal{{ order.id }}" tabindex="-1" role="dialog" aria-labelledby="viewModalLabel{{ order.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewModalLabel{{ order.id }}">Prescription Document</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img src="{{ url_for('static', filename='uploads/' ~ order.prescription) }}" alt="Prescription" class="img-fluid" style="max-width: 100%; max-height: 70vh;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+{% endblock %}

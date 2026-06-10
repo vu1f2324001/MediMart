@@ -1,0 +1,824 @@
+
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+/* Root Variables for Consistent Theming */
+:root {
+  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  --glass-bg: rgba(255, 255, 255, 0.95);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.07);
+  --shadow-medium: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --shadow-heavy: 0 20px 40px rgba(0, 0, 0, 0.15);
+  --border-radius: 15px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Enhanced Admin Dashboard Background */
+.admin-dashboard {
+  background: var(--primary-gradient);
+  min-height: 100vh;
+  padding: 20px 0;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.admin-dashboard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.05)"/><circle cx="50" cy="10" r="0.5" fill="rgba(255,255,255,0.08)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.1;
+  pointer-events: none;
+}
+
+/* Enhanced Dashboard Header */
+.dashboard-header {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--border-radius);
+  padding: 30px;
+  margin-bottom: 30px;
+  box-shadow: var(--shadow-medium);
+  position: relative;
+  overflow: hidden;
+  animation: slideInUp 0.6s ease-out;
+}
+
+.dashboard-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  animation: shimmer 2s infinite;
+}
+
+/* Enhanced Tables */
+.table-modern {
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  background: white;
+}
+
+.table-modern thead th {
+  background: var(--primary-gradient);
+  color: white;
+  border: none;
+  font-weight: 600;
+  padding: 15px;
+  position: relative;
+}
+
+.table-modern thead th::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(255,255,255,0.3);
+}
+
+.table-modern tbody tr {
+  transition: var(--transition);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.table-modern tbody tr:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  transform: scale(1.01);
+}
+
+.table-modern tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* Enhanced Buttons */
+.btn-modern {
+  border-radius: 25px;
+  padding: 10px 25px;
+  font-weight: 600;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  border: none;
+}
+
+.btn-modern::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-modern:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btn-modern:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+.btn-modern span {
+  position: relative;
+  z-index: 2;
+}
+
+/* Enhanced Modals */
+.modal-content {
+  border-radius: var(--border-radius);
+  border: none;
+  box-shadow: var(--shadow-heavy);
+  backdrop-filter: blur(20px);
+  background: var(--glass-bg);
+}
+
+.modal-header {
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: var(--border-radius) var(--border-radius) 0 0;
+  background: var(--primary-gradient);
+  color: white;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+.modal-body {
+  padding: 30px;
+}
+
+.modal-footer {
+  border-top: 1px solid var(--glass-border);
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+/* Loading Animation */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.loading {
+  animation: pulse 1.5s infinite;
+}
+
+/* Slide In Animation */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Shimmer Effect */
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Responsive Enhancements */
+@media (max-width: 768px) {
+  .admin-dashboard {
+    padding: 10px 0;
+  }
+
+  .dashboard-header {
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .table-responsive {
+    font-size: 0.9rem;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-gradient);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+/* Tooltip Enhancements */
+.tooltip-inner {
+  background: var(--primary-gradient);
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+/* Focus States */
+.form-control:focus,
+.form-select:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  transform: scale(1.02);
+  transition: var(--transition);
+}
+
+/* Badge Enhancements */
+.badge {
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: var(--transition);
+}
+
+.badge:hover {
+  transform: scale(1.05);
+}
+
+/* Card Hover Effects */
+.card {
+  transition: var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* Enhanced Dropdowns */
+.dropdown-menu {
+  border-radius: var(--border-radius);
+  border: none;
+  box-shadow: var(--shadow-medium);
+  backdrop-filter: blur(10px);
+  background: var(--glass-bg);
+}
+
+.dropdown-item {
+  transition: var(--transition);
+  border-radius: 8px;
+  margin: 2px 5px;
+}
+
+.dropdown-item:hover {
+  background: var(--primary-gradient);
+  color: white;
+  transform: translateX(5px);
+}
+</style>
+
+<div class="admin-dashboard">
+  <div class="container-fluid">
+    <!-- Header -->
+    <div class="dashboard-header">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h1 class="mb-2"><i class="fas fa-shopping-cart text-primary"></i> All Orders</h1>
+          <p class="text-muted mb-0">Manage and track all customer orders.</p>
+        </div>
+        <div class="col-md-6 text-end">
+          <div class="d-flex justify-content-end gap-2">
+            <button class="btn btn-outline-primary btn-modern" onclick="window.print()">
+              <i class="fas fa-print"></i> Export Report
+            </button>
+            <button class="btn btn-primary btn-modern" onclick="location.reload()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<div class="table-responsive">
+  <table class="table table-modern">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>User ID</th>
+        <th>Medicines</th>
+        <th>Prescription</th>
+        <th>Address</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td>{{ order.id }}</td>
+      <td>{{ order.user_id }}</td>
+      <td>
+        {% if order.medicine.image %}
+        <a href="{{ order.medicine.image }}" target="_blank">
+          <img src="{{ order.medicine.image }}" alt="{{ order.medicine.name }}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px; cursor: pointer;">
+        </a>
+        {% endif %}
+        {{ order.medicine.name }}
+      </td>
+      <td>
+        {% if order.prescription %}
+        <a href="{{ url_for('static', filename='uploads/' ~ order.prescription) }}" target="_blank">View</a>
+        {% else %}
+        N/A
+        {% endif %}
+      </td>
+      <td>{{ order.address }}</td>
+      <td>
+        {% if order.status == 'Approved' %}
+        <span class="badge bg-success">{{ order.status }}</span>
+        {% elif order.status == 'Rejected' %}
+        <span class="badge bg-danger">{{ order.status }}</span>
+        {% elif order.status == 'Processing' %}
+        <span class="badge bg-info">{{ order.status }}</span>
+        {% elif order.status == 'Shipped' %}
+        <span class="badge bg-primary">{{ order.status }}</span>
+        {% elif order.status == 'Delivered' %}
+        <span class="badge bg-success">{{ order.status }}</span>
+        {% else %}
+        <span class="badge bg-warning text-dark">{{ order.status }}</span>
+        {% endif %}
+      </td>
+      <td>
+        <button class="btn btn-sm btn-primary me-1" onclick="viewOrder({{ order.id }})"
+                data-order-id="{{ order.id |tojson }}"
+                data-user-id="{{ order.user_id |tojson }}"
+                data-medicine-name="{{ (order.medicine.name if order.medicine else 'N/A') |tojson }}"
+                data-medicine-image="{{ (order.medicine.image if order.medicine else '') |tojson }}"
+                data-medicine-price="{{ (order.medicine.price if order.medicine else 0) |tojson }}"
+                data-quantity="{{ (order.quantity if order.quantity else 1) |tojson }}"
+                data-status="{{ order.status |tojson }}"
+                data-address="{{ (order.address if order.address else 'N/A') |tojson }}"
+                data-prescription="{{ (order.prescription if order.prescription else '') |tojson }}">
+          <i class="fas fa-eye"></i> View
+        </button>
+        {% if order.status == 'Pending' %}
+        <form method="POST" action="{{ url_for('admin.update_order_status', order_id=order.id) }}" class="d-inline">
+          <input type="hidden" name="status" value="Approved">
+          <button class="btn btn-sm btn-success">✅ Approve</button>
+        </form>
+        <form method="POST" action="{{ url_for('admin.update_order_status', order_id=order.id) }}" class="d-inline">
+          <input type="hidden" name="status" value="Rejected">
+          <button class="btn btn-sm btn-danger">❌ Reject</button>
+        </form>
+        {% else %}
+        <small>No action</small>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<!-- Order View Modal -->
+<div class="modal fade" id="viewOrderModal" tabindex="-1" aria-labelledby="viewOrderModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="viewOrderModalLabel">Order Details - ID: <span id="modalOrderId"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Medicine Details (Cart)</h6>
+            <img id="modalMedicineImage" src="" alt="Medicine Image" class="img-fluid mb-2" style="max-height: 200px; width: 100%;" onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
+            <p><strong>Name:</strong> <span id="modalMedicineName"></span></p>
+            <p><strong>Price:</strong> ₹<span id="modalMedicinePrice"></span></p>
+            <p><strong>Quantity:</strong> <span id="modalQuantity"></span></p>
+          </div>
+          <div class="col-md-6">
+            <h6>Order Details</h6>
+            <p><strong>User ID:</strong> <span id="modalUserId"></span></p>
+            <p><strong>Status:</strong> <span id="modalStatus" class="badge bg-secondary"></span></p>
+            <p><strong>Address:</strong> <span id="modalAddress"></span></p>
+            <div id="modalPrescription" style="display: none;">
+              <p><strong>Prescription:</strong> <a id="modalPrescriptionLink" href="#" target="_blank" class="btn btn-sm btn-info">View Prescription</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="text-center mt-4">
+  <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-modern btn-secondary">
+    <i class="fas fa-arrow-left"></i> Back to Dashboard
+  </a>
+</div>
+
+<!-- Charts JavaScript (local fallback) -->
+<script src="{{ url_for('static', filename='vendor/chart.min.js') }}"></script>
+<script>
+  // Sales Chart
+  const salesCtx = document.getElementById('salesChart').getContext('2d');
+  const salesData = {{ sales_data | default([]) | tojson }};
+  const salesLabels = {{ status_labels | default([]) | tojson }};
+  const salesChart = new Chart(salesCtx, {
+    type: 'bar',
+    data: {
+      labels: salesLabels,
+      datasets: [{
+        label: 'Sales (₹)',
+        data: salesData,
+        backgroundColor: ['#ffc107', '#17a2b8', '#6f42c1', '#28a745', '#dc3545', '#fd7e14', '#20c997', '#e83e8c'],
+        borderColor: ['#ffc107', '#17a2b8', '#6f42c1', '#28a745', '#dc3545', '#fd7e14', '#20c997', '#e83e8c'],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'top',
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  // Order Status Chart
+  const orderStatusCtx = document.getElementById('orderStatusChart').getContext('2d');
+  const orderData = {{ order_counts | default([]) | tojson }};
+  const orderStatusChart = new Chart(orderStatusCtx, {
+    type: 'doughnut',
+    data: {
+      labels: salesLabels,
+      datasets: [{
+        data: orderData,
+        backgroundColor: ['#ffc107', '#17a2b8', '#6f42c1', '#28a745', '#dc3545', '#fd7e14', '#20c997', '#e83e8c']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom',
+        }
+      }
+    }
+  });
+
+  // Medicine filtering and sorting functionality
+  function filterMedicines() {
+    const searchFilter = document.getElementById('medicineSearch').value.toLowerCase();
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    const stockFilter = document.getElementById('stockFilter').value;
+    const sortBy = document.getElementById('sortBy').value;
+
+    const cards = document.querySelectorAll('#medicinesGrid .medicine-item');
+    const cardsArray = Array.from(cards);
+
+    // Filter cards
+    cardsArray.forEach(card => {
+      const name = card.querySelector('.card-title').textContent.toLowerCase();
+      const description = card.querySelector('.card-text').textContent.toLowerCase();
+      const category = card.getAttribute('data-category');
+      const stock = parseInt(card.getAttribute('data-stock'));
+
+      let matchesSearch = !searchFilter || name.includes(searchFilter) || description.includes(searchFilter);
+      let matchesCategory = !categoryFilter || category === categoryFilter;
+      let matchesStock = true;
+
+      if (stockFilter === 'in-stock') {
+        matchesStock = stock > 10;
+      } else if (stockFilter === 'low-stock') {
+        matchesStock = stock > 0 && stock <= 10;
+      } else if (stockFilter === 'out-of-stock') {
+        matchesStock = stock === 0;
+      }
+
+      card.style.display = matchesSearch && matchesCategory && matchesStock ? '' : 'none';
+    });
+
+    // Sort visible cards
+    const visibleCards = cardsArray.filter(card => card.style.display !== 'none');
+    visibleCards.sort((a, b) => {
+      let aValue, bValue;
+
+      switch (sortBy) {
+        case 'name':
+          aValue = a.querySelector('.card-title').textContent.toLowerCase();
+          bValue = b.querySelector('.card-title').textContent.toLowerCase();
+          return aValue.localeCompare(bValue);
+        case 'price':
+          aValue = parseFloat(a.getAttribute('data-price'));
+          bValue = parseFloat(b.getAttribute('data-price'));
+          return aValue - bValue;
+        case 'stock':
+          aValue = parseInt(a.getAttribute('data-stock'));
+          bValue = parseInt(b.getAttribute('data-stock'));
+          return bValue - aValue; // Higher stock first
+        case 'category':
+          aValue = a.getAttribute('data-category');
+          bValue = b.getAttribute('data-category');
+          return aValue.localeCompare(bValue);
+        default:
+          return 0;
+      }
+    });
+
+    // Reorder DOM elements
+    const container = document.getElementById('medicinesGrid');
+    visibleCards.forEach(card => container.appendChild(card));
+  }
+
+  // Event listeners for filters and sorting
+  document.getElementById('medicineSearch').addEventListener('keyup', filterMedicines);
+  document.getElementById('categoryFilter').addEventListener('change', filterMedicines);
+  document.getElementById('stockFilter').addEventListener('change', filterMedicines);
+  document.getElementById('sortBy').addEventListener('change', filterMedicines);
+
+  // Bulk actions functionality
+  function toggleBulkActions() {
+    const checkboxes = document.querySelectorAll('.medicine-checkbox:checked');
+    const bulkActions = document.getElementById('bulkActions');
+    const selectedCount = document.getElementById('selectedCount');
+
+    if (checkboxes.length > 0) {
+      bulkActions.style.display = 'flex';
+      selectedCount.textContent = `${checkboxes.length} medicine${checkboxes.length > 1 ? 's' : ''} selected`;
+    } else {
+      bulkActions.style.display = 'none';
+    }
+  }
+
+  function bulkDelete() {
+    const checkboxes = document.querySelectorAll('.medicine-checkbox:checked');
+    if (checkboxes.length === 0) return;
+
+    if (confirm(`Are you sure you want to delete ${checkboxes.length} medicine${checkboxes.length > 1 ? 's' : ''}?`)) {
+      const ids = Array.from(checkboxes).map(cb => cb.closest('.medicine-item').querySelector('[data-id]').getAttribute('data-id'));
+      // Create a form to submit the delete request
+      const form = document.createElement('form');
+      form.method = 'POST';
+      form.action = '{{ url_for("admin.bulk_delete_medicines") }}';
+
+      ids.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'medicine_ids';
+        input.value = id;
+        form.appendChild(input);
+      });
+
+      document.body.appendChild(form);
+      form.submit();
+    }
+  }
+
+  function bulkExport() {
+    const checkboxes = document.querySelectorAll('.medicine-checkbox:checked');
+    if (checkboxes.length === 0) return;
+
+    const ids = Array.from(checkboxes).map(cb => cb.closest('.medicine-item').querySelector('[data-id]').getAttribute('data-id'));
+    const url = '{{ url_for("admin.export_medicines") }}?' + ids.map(id => `ids=${id}`).join('&');
+    window.open(url, '_blank');
+  }
+
+  // Attach bulk actions to checkboxes
+  document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('medicine-checkbox')) {
+      toggleBulkActions();
+    }
+  });
+
+  document.getElementById('orderSearch').addEventListener('keyup', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#ordersTable tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(filter) ? '' : 'none';
+    });
+  });
+
+  document.getElementById('orderStatusFilter').addEventListener('change', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#ordersTable tbody tr');
+    rows.forEach(row => {
+      const status = row.querySelector('.badge').textContent.toLowerCase();
+      row.style.display = !filter || status.includes(filter) ? '' : 'none';
+    });
+  });
+
+  // Edit Medicine Modal
+  function openEditModal(button) {
+    const data = button.dataset;
+    document.getElementById('editMedicineId').value = data.id;
+    document.getElementById('editMedicineName').value = data.medicine_name;
+    document.getElementById('editName').value = data.name;
+    document.getElementById('editType').value = data.type;
+    document.getElementById('editAgeGroup').value = data.age_group;
+    document.getElementById('editCategory').value = data.category;
+    document.getElementById('editPrice').value = data.price;
+    document.getElementById('editDiscount').value = data.discount;
+    document.getElementById('editStock').value = data.stock;
+    document.getElementById('editDescription').value = data.description;
+    document.getElementById('editMedicineForm').action = '/admin/edit_medicine/' + data.id;
+    new bootstrap.Modal(document.getElementById('editMedicineModal')).show();
+  }
+
+  // View Medicine Modal
+  function openViewModal(button) {
+    const data = button.dataset;
+    document.getElementById('viewMedicineImage').src = data.image;
+    document.getElementById('viewMedicineName').textContent = data.medicine_name;
+    document.getElementById('viewName').textContent = data.name;
+    document.getElementById('viewType').textContent = data.type;
+    document.getElementById('viewAgeGroup').textContent = data.age_group;
+    document.getElementById('viewCategory').textContent = data.category;
+    document.getElementById('viewPrice').textContent = '₹' + parseFloat(data.price).toFixed(2);
+    document.getElementById('viewDiscount').textContent = data.discount + '%';
+    document.getElementById('viewStock').textContent = data.stock + ' units';
+    document.getElementById('viewDescription').textContent = data.description;
+    new bootstrap.Modal(document.getElementById('viewMedicineModal')).show();
+  }
+
+  // View Order Modal
+  function openViewOrderModal(button) {
+    const data = button.dataset;
+    document.getElementById('orderId').textContent = data.orderId;
+    const imgSrc = data.medicineImage || '/static/uploads/default.png';
+    document.getElementById('orderMedicineImage').src = imgSrc;
+    document.getElementById('orderMedicineName').textContent = data.medicineName;
+    const originalPrice = parseFloat(data.medicinePrice);
+    const discount = parseFloat(data.discount || 0);
+    const discountedPrice = originalPrice * (1 - discount / 100);
+    let priceHtml = '';
+    if (discount > 0) {
+      priceHtml = '<span class="fw-semibold text-muted text-decoration-line-through">₹' + originalPrice.toFixed(2) + '</span><br><span class="fw-semibold text-success">₹' + discountedPrice.toFixed(2) + '</span>';
+    } else {
+      priceHtml = '<span class="fw-semibold text-success">₹' + originalPrice.toFixed(2) + '</span>';
+    }
+    document.getElementById('orderMedicinePrice').innerHTML = priceHtml;
+    document.getElementById('orderQuantity').textContent = data.quantity;
+    document.getElementById('orderCustomer').textContent = data.customer;
+    document.getElementById('orderAddress').textContent = data.address || 'N/A';
+    document.getElementById('orderTotal').textContent = '₹' + parseFloat(data.total).toFixed(2);
+    const statusEl = document.getElementById('orderStatus');
+    statusEl.textContent = data.status.charAt(0).toUpperCase() + data.status.slice(1);
+    let statusClass = 'badge bg-secondary';
+    if (data.status === 'delivered') {
+      statusClass = 'badge bg-success';
+    } else if (data.status === 'shipped') {
+      statusClass = 'badge bg-info';
+    } else if (data.status === 'processing') {
+      statusClass = 'badge bg-warning';
+    }
+    statusEl.className = statusClass;
+    document.getElementById('orderDate').textContent = data.date;
+    new bootstrap.Modal(document.getElementById('viewOrderModal')).show();
+  }
+
+  // Legacy viewOrder for compatibility
+  function viewOrder(id) {
+    const button = document.querySelector(`button[data-order-id="${id}"]`);
+    if (button) {
+      openViewOrderModal(button);
+    } else {
+      window.location.href = '/admin/order/' + id;
+    }
+  }
+
+  // Update Order Status
+  function updateOrderStatus(id, status) {
+    if (status === undefined) {
+      status = prompt('Enter new status (pending, processing, shipped, delivered):');
+    }
+    if (status) {
+      window.location.href = '/admin/update_order_status/' + id + '?status=' + status;
+    }
+  }
+
+  // Update Prescription Status
+  function updatePrescriptionStatus(id) {
+    const status = prompt('Enter new status (pending, processing, shipped, delivered):');
+    if (status) {
+      window.location.href = '/admin/update_prescription_status/' + id + '?status=' + status;
+    }
+  }
+
+  // Edit Offer Modal
+  function openEditOfferModal(id, title, description, discount, validUntil) {
+    document.getElementById('editOfferId').value = id;
+    document.getElementById('editOfferTitle').value = title;
+    document.getElementById('editOfferDescription').value = description;
+    document.getElementById('editOfferDiscount').value = discount;
+    document.getElementById('editOfferValidUntil').value = validUntil;
+    document.getElementById('editOfferForm').action = '/admin/edit_offer/' + id;
+    new bootstrap.Modal(document.getElementById('editOfferModal')).show();
+  }
+
+  // Prescription search functionality
+  document.getElementById('prescriptionSearch').addEventListener('keyup', filterPrescriptions);
+  document.getElementById('prescriptionStatusFilter').addEventListener('change', filterPrescriptions);
+
+  function filterPrescriptions() {
+    const searchFilter = document.getElementById('prescriptionSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('prescriptionStatusFilter').value.toLowerCase();
+
+    const rows = document.querySelectorAll('#prescriptionsTable tbody tr');
+    rows.forEach(row => {
+      const patient = row.cells[1].textContent.toLowerCase();
+      const address = row.cells[2].textContent.toLowerCase();
+      const doctor = row.cells[3].textContent.toLowerCase();
+      const status = row.cells[6].textContent.toLowerCase();
+      const date = row.cells[7].textContent.toLowerCase();
+
+      const matchesSearch = !searchFilter || patient.includes(searchFilter) || address.includes(searchFilter) || doctor.includes(searchFilter) || date.includes(searchFilter);
+      const matchesStatus = !statusFilter || status.includes(statusFilter);
+
+      row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+    });
+  }
+
+  // User search functionality
+  document.getElementById('userSearch').addEventListener('keyup', function() {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#usersTable tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(filter) ? '' : 'none';
+    });
+  });
+
+  // Export functions
+  function exportCSV() {
+    const table = document.querySelector('#prescriptionsTable');
+    let csv = [];
+    const rows = table.querySelectorAll('tr');
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = [], cols = rows[i].querySelectorAll('td, th');
+
+      for (let j = 0; j < cols.length; j++) {
+        row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
+      }
+
+      csv.push(row.join(','));
+    }
+
+    const csvContent = csv.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'prescriptions.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
+  function exportPDF() {
+    window.location.href = '/admin/export_prescriptions_pdf';
+  }
+
+  // View Prescription
+  function viewPrescription(element) {
+    const src = element.getAttribute('data-src') || element.src;
+    document.getElementById('prescriptionImage').src = src;
+    new bootstrap.Modal(document.getElementById('viewPrescriptionModal')).show();
+  }
+</script>
+{% endblock %}

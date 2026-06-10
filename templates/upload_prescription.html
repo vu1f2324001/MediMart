@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">📄 Upload Prescription</h4>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-info mb-4">
+            <strong>📋 Upload Your Prescription</strong><br>
+            Submit your prescription for review. Our doctors will verify it and you'll receive status updates in "My Orders" section.
+          </div>
+          <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="disease" class="form-label">Disease</label>
+              <input type="text" class="form-control" id="disease" name="disease" required>
+            </div>
+            <div class="mb-3">
+              <label for="symptoms" class="form-label">Symptoms</label>
+              <textarea class="form-control" id="symptoms" name="symptoms" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="prescription_details" class="form-label">Prescription Details</label>
+              <textarea class="form-control" id="prescription_details" name="prescription_details" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="address" class="form-label">Delivery Address</label>
+              <textarea class="form-control" id="address" name="address" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="prescription" class="form-label">Select Prescription File</label>
+              <input type="file" class="form-control" id="prescription" name="prescription" accept=".pdf,.jpg,.jpeg,.png" required>
+              <div class="form-text">Accepted formats: PDF, JPG, JPEG, PNG</div>
+            </div>
+            <button type="submit" class="btn btn-primary">📤 Upload Prescription</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+<!-- templates/cart.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h2>Your Cart 🛒</h2>
+{% if items %}
+<table class="table table-bordered">
+  <thead>
+    <tr><th>Medicine</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ item.medicine.name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>
+        {% if item.medicine.discount > 0 %}
+          <span style="text-decoration: line-through;">₹{{ item.medicine.price }}</span><br>
+          <span style="color: green;">₹{{ "%.2f"|format(item.medicine.price * (1 - item.medicine.discount / 100)) }} ({{ item.medicine.discount }}% off)</span>
+        {% else %}
+          ₹{{ item.medicine.price }}
+        {% endif %}
+      </td>
+      <td>₹{{ "%.2f"|format(item.medicine.price * (1 - item.medicine.discount / 100) * item.quantity) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<h5>Total: ₹{{ "%.2f"|format(total) }}</h5>
+<a href="{{ url_for('main.clear_cart') }}" class="btn btn-danger btn-sm">Clear Cart</a>
+<a href="{{ url_for('main.checkout') }}" class="btn btn-success btn-sm">Checkout</a>
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}

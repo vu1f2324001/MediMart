@@ -1,0 +1,44 @@
+<!-- templates/checkout.html -->
+{% extends 'base.html' %}
+{% block content %}
+<h2>🧾 Checkout & Upload Prescription</h2>
+{% if items %}
+<table class="table table-bordered">
+  <thead>
+    <tr><th>Medicine</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td>{{ item.medicine.name }}</td>
+      <td>{{ item.quantity }}</td>
+      <td>
+        {% if item.medicine.discount > 0 %}
+          <span style="text-decoration: line-through;">₹{{ item.medicine.price }}</span><br>
+          <span style="color: green;">₹{{ "%.2f"|format(item.medicine.price * (1 - item.medicine.discount / 100)) }} ({{ item.medicine.discount }}% off)</span>
+        {% else %}
+          ₹{{ item.medicine.price }}
+        {% endif %}
+      </td>
+      <td>₹{{ "%.2f"|format(item.subtotal) }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<h5>Total: ₹{{ "%.2f"|format(total) }}</h5>
+
+<form method="POST" enctype="multipart/form-data">
+  <div class="mb-3">
+    <label>Upload Prescription (PDF/JPG)</label>
+    <input type="file" name="prescription" class="form-control">
+  </div>
+  <div class="mb-3">
+    <label>Delivery Address</label>
+    <textarea name="address" class="form-control" rows="3" required></textarea>
+  </div>
+  <button type="submit" class="btn btn-success">Place Order</button>
+</form>
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}

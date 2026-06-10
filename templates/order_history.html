@@ -1,0 +1,33 @@
+<!-- templates/order_history.html -->
+ 
+{% extends 'base.html' %}
+
+
+{% block content %}
+<h2>🧾 Your Order History</h2>
+
+{% if orders %}
+
+<table class="table table-bordered">
+  <thead>
+    <tr><th>Order ID</th><th>Medicines</th><th>Status</th><th>Prescription</th></tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td>{{ order.id }}</td>
+      <td>{{ order.medicines }}</td>
+      <td>{{ order.status }}</td>
+      <td>
+        {% if order.prescription %}
+        <a href="{{ url_for('static', filename='uploads/' ~ order.prescription) }}" target="_blank">View</a>
+        {% else %}N/A{% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No orders placed yet.</p>
+{% endif %}
+{% endblock %}
