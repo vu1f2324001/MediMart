@@ -95,7 +95,6 @@ Please provide this OTP to confirm that you have received your prescription medi
 This OTP is valid for 24 hours.
 
 If you did not receive your prescription medicines or have any issues, please contact our support team.
-
 Thank you for choosing our pharmacy!
 
 Best regards,
