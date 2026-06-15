@@ -16,7 +16,6 @@ from email.message import EmailMessage
 from config import EMAIL_ADDRESS, EMAIL_PASSWORD, ADMIN_EMAIL
 from models import db, User, Medicine, Order, Offer
 
-
 def send_order_email(user_email, order_details):
     msg = EmailMessage()
     msg['Subject'] = '📦 New Order Placed'
