@@ -2,7 +2,7 @@ from models import db, Order
 from config import Config
 from flask import Flask
 
-app = Flask(__name__)
+app = Flask(__name__) 
 app.config.from_object(Config)
 db.init_app(app)
 
