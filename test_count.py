@@ -3,4 +3,4 @@ from models import db, Prescription
 
 with app.app_context():
     total = Prescription.query.count()
-    print(f"Total prescriptions: {total}")
+    print(f"Total prescriptions: {total}") 
