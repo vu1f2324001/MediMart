@@ -4,7 +4,7 @@ from flask_bcrypt import Bcrypt
 conn = sqlite3.connect('pharma.db')
 c = conn.cursor()
 
-bcrypt = Bcrypt()
+bcrypt = Bcrypt() 
 hashed = bcrypt.generate_password_hash('adminpass').decode('utf-8')
 
 c.execute("""INSERT OR IGNORE INTO user 
